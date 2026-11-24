@@ -31,3 +31,12 @@ bash scripts/start-debian.sh
 - Não permitir path traversal, symlinks externos, acesso não autorizado ou proxies com destino arbitrário.
 - Mensagens de erro claras e acessíveis; não colocar segredos em logs.
 - Interface responsiva, foco visível, sem dependência de CDN para a operação do painel.
+
+## Regras adicionais: acesso remoto MQTT/MCP
+
+- Broker próprio com MQTT sobre TLS e ACL por dispositivo. Nunca habilitar acesso anônimo ou MQTT sem criptografia.
+- Agente conecta de saída, com usuário específico por dispositivo, reconexão controlada e auditoria; não instalar root nem permitir terminal remoto irrestrito.
+- Escrita e scripts de testes/build devem ser opt-in para projetos confiáveis; operações destrutivas requerem confirmação separada.
+- MCP HTTP somente em loopback atrás de proxy HTTPS com OAuth compatível antes de expor a clientes externos. Token Bearer de desenvolvimento não equivale a OAuth.
+- Não implementar cota mensal de chamadas. Limites de segurança (concorrência, timeout e payload) permanecem obrigatórios.
+- Não afirmar acesso por ChatGPT/Claude/Gemini até validação por conector suportado no produto e consentimento do usuário.

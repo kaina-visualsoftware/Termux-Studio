@@ -1,0 +1,9 @@
+# Usuário do gateway (instância única); controle de acesso do broker.
+user ts-gateway
+topic write termux-studio/v1/device/+/request
+topic read termux-studio/v1/device/+/response
+
+# Qualquer outro username deve ser o DEVICE_ID.
+# Padrões MQTT interpolam %u; o agente só lê seus comandos e publica suas respostas.
+pattern read termux-studio/v1/device/%u/request
+pattern write termux-studio/v1/device/%u/response

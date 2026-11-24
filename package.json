@@ -9,12 +9,15 @@
     "build": "tsc -b && vite build",
     "start": "node server/index.mjs",
     "test": "node --test tests/*.test.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "remote:agent": "node --env-file=remote/.env.agent remote/agent.mjs",
+    "remote:gateway": "node --env-file=remote/.env.gateway remote/gateway.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "mqtt": "^5.16.1"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
