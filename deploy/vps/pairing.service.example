@@ -1,0 +1,25 @@
+# Instale como /etc/systemd/system/termux-studio-pairing.service no VPS.
+# O serviço HTTP escuta SOMENTE em 127.0.0.1 e requer proxy HTTPS na frente.
+[Unit]
+Description=Termux Studio one-time device pairing
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=termuxstudio
+Group=termuxstudio
+WorkingDirectory=/opt/Termux-Studio
+EnvironmentFile=/etc/termux-studio/pairing.env
+ExecStart=/usr/bin/node /opt/Termux-Studio/remote/pairing-server.mjs
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/termux-studio/pairings
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -12,12 +12,12 @@ node -e 'const [major,minor]=process.versions.node.split(".").map(Number);if(maj
 if [ ! -d node_modules/mqtt ]; then
   npm install --omit=dev --no-audit --no-fund
 fi
-if [ ! -f remote/.env.agent ]; then
-  cp remote/.env.agent.example remote/.env.agent
+if [ -f remote/.env.agent ]; then
   chmod 600 remote/.env.agent
-  echo 'Preencha remote/.env.agent com suas credenciais de dispositivo geradas pelo broker.'
-  echo 'Por segurança o instalador NÃO ativa acesso remoto até a configuração ser concluída.'
+  echo 'Identidade existente preservada. Verifique as credenciais antes de iniciar o agente.'
 else
-  chmod 600 remote/.env.agent
+  echo 'Sem identidade configurada. Escolha UM dos métodos:'
+  echo '  Pareamento: node remote/pair-agent.mjs https://pair.seudominio.com/v1/pair meu-dispositivo'
+  echo '  Manual: cp remote/.env.agent.example remote/.env.agent && chmod 600 remote/.env.agent'
 fi
 printf 'Instalado. Para iniciar: bash scripts/start-remote-agent.sh\n'

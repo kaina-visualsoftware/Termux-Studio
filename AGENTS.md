@@ -40,3 +40,6 @@ bash scripts/start-debian.sh
 - MCP HTTP somente em loopback atrás de proxy HTTPS com OAuth compatível antes de expor a clientes externos. Token Bearer de desenvolvimento não equivale a OAuth.
 - Não implementar cota mensal de chamadas. Limites de segurança (concorrência, timeout e payload) permanecem obrigatórios.
 - Não afirmar acesso por ChatGPT/Claude/Gemini até validação por conector suportado no produto e consentimento do usuário.
+
+- O pareamento com código aleatório de uso único só opera no proxy HTTPS; nunca armazenar segredos em texto puro na base de pareamento, nem registrar códigos nos logs.
+- Provisione MQTT no broker antes de emitir código, e execute servidor de pareamento com conta separada sem permissões administrativas do broker.
