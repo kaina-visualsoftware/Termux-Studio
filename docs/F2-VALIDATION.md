@@ -14,10 +14,10 @@
 ```bash
 git checkout feat/f2-backend-validation
 npm install --no-audit --no-fund
-bash scripts/verify-local.sh
+bash scripts/verify-local.sh --require-build
 ```
 
-Se a rede estiver disponível, o verificador executará também `npm run build` após encontrar `node_modules`.
+O modo `--require-build` retorna código 2 se as dependências estiverem ausentes e não permite marcar a etapa como aprovada sem `dist/index.html`. O diagnóstico `bash scripts/check-debian.sh` informa explicitamente se o code-server está ausente; um healthcheck positivo não substitui verificação de login.
 
 ## Próxima validação em Debian PRoot
 
