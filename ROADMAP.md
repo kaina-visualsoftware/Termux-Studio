@@ -5,9 +5,9 @@
 | F0 | Arquitetura React + Node + code-server; modelo de segurança | Especificado |
 | F1 | Dashboard React, API local de leitura, lista de projetos, abertura do editor | Código criado; teste real no ARM64 pendente |
 | F2 | Instalação no Debian PRoot, compilação React e confirmação de login no code-server | Pendente |
-| F3 | Cloudflare Tunnel + Access, dois hostnames, testes remotos e de acesso negado | Pendente |
+| F3 | GitHub Pages e conexão remota via Cloudflare Tunnel + Access | Frontend/API e instruções criados; configuração e testes reais pendentes |
 | F4 | Persistência controlada no Android/Termux e recuperação após suspensão | Pendente |
-| F5 | Integração opcional com Termux Bridge / MCP autenticado, ferramentas específicas e auditáveis | Planejado, fora do MVP |
+| F5 | Integração de IA: MCP local, futuro conector remoto autenticado e auditoria | MCP stdio local preparado; remoto e homologação pendentes |
 
 ## Critérios de homologação F2
 

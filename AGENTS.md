@@ -31,3 +31,12 @@ bash scripts/start-debian.sh
 - Não permitir path traversal, symlinks externos, acesso não autorizado ou proxies com destino arbitrário.
 - Mensagens de erro claras e acessíveis; não colocar segredos em logs.
 - Interface responsiva, foco visível, sem dependência de CDN para a operação do painel.
+
+
+## GitHub Pages e IA remota
+
+- Publicar o build estático, nunca o código da API nem credenciais.
+- CORS autoriza somente a origem esperada, mas não autentica: a API e o code-server dependem de Cloudflare Access ativado e testado em modo anônimo.
+- Ferramentas de IA devem usar integração explícita; jamais criar uma rota HTTP de shell sem controle de identidade e aprovação.
+- O MCP do projeto é **stdio local**, com leitura restrita e escrita opt-in; nunca publicar esse processo em TCP/HTTP.
+- Para evitar uso de GitHub Actions, publicar build gerado localmente na branch gh-pages.
