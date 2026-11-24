@@ -123,3 +123,18 @@ npm run build # compilação de React (requer npm install)
 - [code-server: instalação no Termux](https://coder.com/docs/code-server/termux/)
 - [code-server: acesso seguro](https://coder.com/docs/code-server/guide/)
 - [Cloudflare: aplicações self-hosted](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/)
+
+
+## Painel público no GitHub Pages (F3, em validação)
+
+O frontend React pode ser publicado sem GitHub Actions em `https://kaina-visualsoftware.github.io/Termux-Studio/`. Os serviços continuam no Debian. Execute `bash scripts/publish-pages.sh` com npm e Git configurados; o script compila Vite para `/Termux-Studio/` e publica o build em `gh-pages`.
+
+Para acessar os arquivos remotamente, configure o backend e o code-server por trás de Cloudflare Tunnel **com Access** nos dois hostnames. No painel publicado, em Configurações, informe a origem HTTPS da API e a URL HTTPS do editor. Confira o guia [GitHub Pages](docs/GITHUB-PAGES.md).
+
+A consulta de projetos usa o backend em `/api/dashboard` com CORS restrito pela variável `ALLOWED_ORIGIN`, que deve ser a origem exata `https://kaina-visualsoftware.github.io`. **CORS não autentica usuários**. Cookies do Access podem ser bloqueados como terceiros por alguns navegadores; veja o plano de fallback no guia.
+
+## Uso por agentes de IA (MCP local)
+
+O projeto inclui `mcp/server.mjs`, um pequeno servidor **stdio** que expõe listagem e leitura de arquivos de código dentro de `PROJECTS_DIR`. A escrita é desativada por padrão e precisa da variável `TERMUX_STUDIO_MCP_WRITE=1`. Não há execução de shell nem endpoint MCP HTTP; a conexão com uma IA remota ainda precisa de um conector apropriado. Consulte [IA e MCP](docs/AI-AGENT.md).
+
+**Status:** esse código foi preparado no repositório, mas GitHub Pages, Cloudflare, build React e instalação/integração MCP no Termux ainda precisam de homologação no ambiente real.
