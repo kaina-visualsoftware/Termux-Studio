@@ -23,7 +23,7 @@ const mqttClient = mqtt.connect(brokerUrl, {
   keepalive: 30,
   queueQoSZero: false,
 })
-const rpc = new RpcOverMqtt(mqttClient, device)
+const rpc = new RpcOverMqtt(mqttClient, device, { timeoutMs: 110_000 })
 mqttClient.on('connect', () => mqttClient.subscribe(channel.response, { qos: 1 }, error => {
   if (error) console.error('Assinatura de respostas falhou:', error.message)
 }))

@@ -8,7 +8,7 @@ fi
 if ! command -v npm >/dev/null; then
   echo 'npm não encontrado.' >&2; exit 1
 fi
-node -e 'if (+process.versions.node.split(".")[0] < 20) process.exit(1)' || { echo 'Node >=20 exigido' >&2; exit 1; }
+node -e 'const [major,minor]=process.versions.node.split(".").map(Number);if(major<20||(major===20&&minor<19)) process.exit(1)' || { echo 'Node >=20.19 exigido' >&2; exit 1; }
 if [ ! -d node_modules/mqtt ]; then
   npm install --omit=dev --no-audit --no-fund
 fi

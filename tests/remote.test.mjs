@@ -42,6 +42,7 @@ test('workspace bloqueia leitura de segredos, links e escrita sem autorização'
     await assert.rejects(() => run('read_file', { project: '../etc', file: 'passwd' }))
     await assert.rejects(() => run('write_file', { project: 'app', file: 'index.ts', content: 'bad' }))
     await assert.rejects(() => run('run_tests', { project: 'app' }))
+    await assert.rejects(() => run('git_status', { project: 'app' }))
   } finally { await rm(root, { recursive: true, force: true }) }
 })
 

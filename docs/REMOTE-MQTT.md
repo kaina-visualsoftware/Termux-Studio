@@ -11,7 +11,7 @@ Nesta primeira versão, o transporte remoto funciona via MQTT com usuário/senha
 ## Componentes
 
 - `remote/agent.mjs`: conecta-se à infraestrutura na inicialização, reinscreve no tópico em reconexões; nunca recebe portas de entrada.
-- `remote/workspace.mjs`: lista projetos, lê arquivos de código, grava com permissão expressa, executa `npm test`, `npm run build`, `git status --short` sem invocar um shell genérico.
+- `remote/workspace.mjs`: lista projetos, lê arquivos de código, grava com permissão expressa, executa `npm test`, `npm run build`, `git status --short` (também restrito a projetos confiáveis) sem invocar um shell genérico.
 - `remote/gateway.mjs`: atende MCP JSON-RPC pelo loopback, autentica Bearer, correlaciona mensagens MQTT e devolve respostas com timeout.
 - `remote/rpc.mjs`: espera correlação por ID e dispositivo, limita a 4 requisições simultâneas.
 - `deploy/mosquitto`: exemplos de broker e ACL com TLS.
@@ -29,7 +29,7 @@ Usar senha+TLS com ACL por tópico é uma base. Para dispositivos administrados 
 ## Debian no Termux: agente
 
 ```bash
-# No Debian (dev-linux), com Git e Node >=20 disponíveis
+# No Debian (dev-linux), com Git e Node >=20.19 disponíveis
 git clone https://github.com/kaina-visualsoftware/Termux-Studio.git
 cd Termux-Studio
 bash scripts/install-remote-agent.sh

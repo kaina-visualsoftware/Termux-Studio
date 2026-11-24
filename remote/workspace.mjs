@@ -100,7 +100,7 @@ export function createWorkspace({ root, allowWrite = false, allowExecute = false
         return { saved: true }
       }
       if (['run_tests', 'run_build', 'git_status'].includes(method)) {
-        if (method !== 'git_status' && (!allowExecute || !trusted.has(project))) throw new Error('Execução não autorizada neste projeto')
+        if (!allowExecute || !trusted.has(project)) throw new Error('Execução não autorizada neste projeto')
         const path = await getProject(home, project)
         const result = await runCommand(path, method)
         audit(method, project, result.code === 0 ? 'ok' : 'failed')
