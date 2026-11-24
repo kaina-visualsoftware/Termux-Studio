@@ -11,7 +11,8 @@
     "test": "node --test tests/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "remote:agent": "node --env-file=remote/.env.agent remote/agent.mjs",
-    "remote:gateway": "node --env-file=remote/.env.gateway remote/gateway.mjs"
+    "remote:gateway": "node --env-file=remote/.env.gateway remote/gateway.mjs",
+    "remote:pairing": "node --env-file=remote/.env.pairing remote/pairing-server.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",

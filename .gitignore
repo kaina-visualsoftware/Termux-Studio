@@ -7,3 +7,5 @@ dist/
 .vscode/
 remote/.env.agent
 remote/.env.gateway
+remote/.env.pairing
+*.redeemed

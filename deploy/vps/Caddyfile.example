@@ -1,0 +1,14 @@
+# Substitua pelo domínio real. É necessário DNS apontando para o VPS
+# e portas 80/443 disponíveis para o Caddy obter certificados HTTPS.
+pair.example.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:8790
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        Cache-Control no-store
+    }
+}
+
+# NÃO publique o gateway MCP sem autenticação OAuth/controle de identidade.
+# A aplicação de pareamento aceita um código forte e de uso único.

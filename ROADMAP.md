@@ -31,7 +31,7 @@
 | R0 | Protocolos MQTT+RPC, ACLs e política de acesso a workspaces | Implementado localmente; testes de unidade aprovados |
 | R1 | Agente Debian ARM64 persistente + broker Mosquitto TLS real | Código preparado; implantação e testes reais pendentes |
 | R2 | Gateway MCP HTTP com correlação por dispositivo e autenticação Bearer piloto | Código preparado; integração real pendente |
-| R3 | OAuth 2.1, sessões MCP modernas, cadastro/revogação de dispositivos | Pendente |
+| R3 | Pareamento de uso único, revogação, OAuth 2.1 e sessões MCP | Pareamento criptografado implementado localmente; registro no broker ainda manual; OAuth pendente |
 | R4 | Painel React para pareamento, estados e autorizações | Pendente |
 | R5 | Testes externos ponta a ponta com ChatGPT e outros clientes MCP | Pendente |
 
