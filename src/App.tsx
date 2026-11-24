@@ -88,22 +88,39 @@ export default function App() {
   const [search, setSearch] = useState('')
   const [customEditorUrl, setCustomEditorUrl] = useState(() => { try { return localStorage.getItem('termux-studio-editor-url') || '' } catch { return '' } })
   const [urlDraft, setUrlDraft] = useState(customEditorUrl)
+  const [customApiUrl, setCustomApiUrl] = useState(() => { try { return localStorage.getItem('termux-studio-api-url') || '' } catch { return '' } })
+  const [apiUrlDraft, setApiUrlDraft] = useState(customApiUrl)
+  const isGitHubPages = window.location.hostname.toLowerCase().endsWith('.github.io')
 
   const refresh = useCallback(async (manual = false) => {
     if (manual) setRefreshing(true)
+    if (isGitHubPages && !customApiUrl) {
+      setData(null)
+      setError('Configure a URL HTTPS da API do Termux nas Configurações para carregar seus projetos.')
+      setLoading(false)
+      setRefreshing(false)
+      return
+    }
     try {
-      const response = await fetch('/api/dashboard', { cache: 'no-store' })
+      const endpoint = customApiUrl ? new URL('/api/dashboard', customApiUrl).toString() : '/api/dashboard'
+      const response = await fetch(endpoint, {
+        cache: 'no-store',
+        credentials: customApiUrl ? 'include' : 'same-origin',
+      })
       if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const result = (await response.json()) as Dashboard
       setData(result)
       setError('')
     } catch {
-      setError('Não foi possível conectar ao painel do Termux. Verifique se o serviço está em execução.')
+      setData(null)
+      setError(customApiUrl
+        ? 'API indisponível ou acesso negado. Entre primeiro na API pelo Cloudflare Access e verifique a política CORS.'
+        : 'Não foi possível conectar ao painel do Termux. Verifique se o serviço está em execução.')
     } finally {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [])
+  }, [customApiUrl, isGitHubPages])
 
   useEffect(() => {
     void refresh()
@@ -139,6 +156,38 @@ export default function App() {
     }
     if (project) url.searchParams.set('folder', project.path)
     window.open(url.toString(), '_blank', 'noopener,noreferrer')
+  }
+
+  function saveApiUrl() {
+    const raw = apiUrlDraft.trim()
+    if (!raw) {
+      try { localStorage.removeItem('termux-studio-api-url') } catch { /* preferência opcional */ }
+      setCustomApiUrl('')
+      setToast('URL da API restaurada para o modo local.')
+      return
+    }
+    if (!validateEditorUrl(raw)) {
+      setToast('A API remota precisa de HTTPS. HTTP somente em localhost.')
+      return
+    }
+    const candidate = new URL(raw)
+    if (candidate.pathname !== '/' || candidate.search || candidate.hash) {
+      setToast('Informe apenas a origem da API, sem caminho, parâmetros ou fragmentos.')
+      return
+    }
+    const value = candidate.origin
+    try { localStorage.setItem('termux-studio-api-url', value) }
+    catch { setToast('Não foi possível salvar a URL neste navegador.'); return }
+    setCustomApiUrl(value)
+    setToast('Endereço da API salvo neste navegador. Entre na API pelo Cloudflare Access para autorizar o acesso.')
+  }
+
+  function loginApi() {
+    if (!customApiUrl) {
+      setToast('Configure uma API HTTPS primeiro.')
+      return
+    }
+    window.open(new URL('/api/dashboard', customApiUrl).toString(), '_blank', 'noopener,noreferrer')
   }
 
   function saveEditorUrl() {
@@ -199,8 +248,8 @@ export default function App() {
 
           {page === 'overview' && <section className="lower-grid"><div className="info-panel"><div className="info-panel-header"><div className="info-badge"><Server size={19} /></div><div><h3>Ambiente de execução</h3><p>Dados do dispositivo onde o painel está rodando</p></div></div><div className="detail-row"><span><Laptop2 size={17} /> Host</span><strong>{data?.device.hostname || '—'}</strong></div><div className="detail-row"><span><HardDrive size={17} /> Memória disponível</span><strong>{formatMemory(data?.device.freeMemory)} / {formatMemory(data?.device.totalMemory)}</strong></div><div className="memory-progress"><div style={{ width: `${Math.min(100, Math.max(0, memoryPercent))}%` }} /></div><div className="detail-row"><span><Wifi size={17} /> Conexão com painel</span><strong className={connected ? 'good-text' : 'bad-text'}>{connected ? 'Ativa' : 'Sem conexão'}</strong></div></div><div className="help-panel"><span className="help-icon"><ShieldCheck size={24} /></span><h3>Acesse com segurança</h3><p>Configure um túnel HTTPS com autenticação para abrir seu workspace fora da rede local.</p><button className="text-link" onClick={() => setPage('settings')}>Como configurar <ArrowRight size={16} /></button><div className="shield-decoration"><ShieldCheck size={110} /></div></div></section>}
 
-          {page === 'settings' && <><div className="page-intro settings-intro"><div><span className="eyebrow">WORKSPACE</span><h1>Configurações</h1><p>Personalize o acesso ao editor e confira as recomendações de segurança.</p></div></div><div className="settings-grid"><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><Globe2 size={20} /></span><div><h2>Endereço público do editor</h2><p>URL utilizada para abrir seu VS Code Online.</p></div></div><label className="field-label" htmlFor="editor-url">URL do code-server</label><input id="editor-url" className="text-field" type="url" placeholder="https://ide.seudominio.com" value={urlDraft} onChange={event => setUrlDraft(event.target.value)} /><p className="field-help">Atual: <code>{publicEditorUrl}</code>. Para acesso remoto, proteja o domínio com Cloudflare Access e mantenha a senha do code-server.</p><div className="form-actions"><button className="primary-btn" onClick={saveEditorUrl}><Check size={17} /> Salvar neste navegador</button><button className="outline-btn" onClick={() => { setUrlDraft(''); setCustomEditorUrl(''); try { localStorage.removeItem('termux-studio-editor-url') } catch { /* no-op */ }; setToast('URL padrão restaurada.') }}>Restaurar</button></div></section><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><ShieldCheck size={20} /></span><div><h2>Checklist de segurança</h2><p>Antes de publicar seu editor.</p></div></div><ul className="safety-list"><li><Check size={17} /> code-server com autenticação por senha</li><li><Check size={17} /> Portas 8080 e 4173 somente em 127.0.0.1</li><li><Check size={17} /> Cloudflare Access em ambos os domínios</li><li><Check size={17} /> HTTPS e políticas de acesso privadas</li></ul><p className="field-help">Nunca use <code>--auth none</code> para publicar o editor na internet.</p></section><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><Monitor size={20} /></span><div><h2>Informações do serviço</h2><p>Detalhes detectados pelo painel.</p></div></div><div className="detail-row"><span>Servidor</span><strong>{data?.device.hostname || '—'}</strong></div><div className="detail-row"><span>Arquitetura</span><strong>{data?.device.arch || '—'}</strong></div><div className="detail-row"><span>Editor</span><strong>{data?.editor.online ? 'Online' : 'Offline'}</strong></div><div className="detail-row"><span>Projetos</span><strong>{data?.projects.length ?? '—'}</strong></div></section><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><BookOpen size={20} /></span><div><h2>Como começar</h2><p>Passos básicos de utilização.</p></div></div><ol className="setup-list"><li>Instale o code-server no Debian e execute o painel.</li><li>Abra <code>http://127.0.0.1:4173</code> no próprio dispositivo.</li><li>Configure dois domínios HTTPS com Cloudflare Tunnel e Access.</li><li>Informe a URL do editor acima e abra seus projetos.</li></ol></section></div></>}
-          <footer className="footer"><span><Code2 size={15} /> Termux Studio <span className="footer-version">v0.1.0</span></span><span>React + code-server · Desenvolvido para ARM64</span></footer>
+          {page === 'settings' && <><div className="page-intro settings-intro"><div><span className="eyebrow">WORKSPACE</span><h1>Configurações</h1><p>Personalize o acesso ao editor e confira as recomendações de segurança.</p></div></div><div className="settings-grid"><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><Wifi size={20} /></span><div><h2>Conexão com o Termux</h2><p>API de projetos protegida por Cloudflare Access.</p></div></div><label className="field-label" htmlFor="api-url">URL pública da API (HTTPS)</label><input id="api-url" className="text-field" type="url" placeholder="https://api.seudominio.com" value={apiUrlDraft} onChange={event => setApiUrlDraft(event.target.value)} /><p className="field-help">No GitHub Pages, configure este endereço para listar seus projetos. A autenticação deve estar ativa no Cloudflare Access; a política CORS do servidor permite apenas a origem autorizada.</p><div className="form-actions"><button className="primary-btn" onClick={saveApiUrl}><Check size={17} /> Salvar API</button><button className="outline-btn" onClick={loginApi} disabled={!customApiUrl}><ExternalLink size={16} /> Entrar na API</button></div></section><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><Globe2 size={20} /></span><div><h2>Endereço público do editor</h2><p>URL utilizada para abrir seu VS Code Online.</p></div></div><label className="field-label" htmlFor="editor-url">URL do code-server</label><input id="editor-url" className="text-field" type="url" placeholder="https://ide.seudominio.com" value={urlDraft} onChange={event => setUrlDraft(event.target.value)} /><p className="field-help">Atual: <code>{publicEditorUrl}</code>. Para acesso remoto, proteja o domínio com Cloudflare Access e mantenha a senha do code-server.</p><div className="form-actions"><button className="primary-btn" onClick={saveEditorUrl}><Check size={17} /> Salvar neste navegador</button><button className="outline-btn" onClick={() => { setUrlDraft(''); setCustomEditorUrl(''); try { localStorage.removeItem('termux-studio-editor-url') } catch { /* no-op */ }; setToast('URL padrão restaurada.') }}>Restaurar</button></div></section><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><ShieldCheck size={20} /></span><div><h2>Checklist de segurança</h2><p>Antes de publicar seu editor.</p></div></div><ul className="safety-list"><li><Check size={17} /> code-server com autenticação por senha</li><li><Check size={17} /> Portas 8080 e 4173 somente em 127.0.0.1</li><li><Check size={17} /> Cloudflare Access na API e no editor</li><li><Check size={17} /> CORS restrito ao domínio do painel; nunca confundir CORS com autenticação</li><li><Check size={17} /> HTTPS e políticas de acesso privadas</li></ul><p className="field-help">Nunca use <code>--auth none</code> para publicar o editor na internet.</p></section><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><Monitor size={20} /></span><div><h2>Informações do serviço</h2><p>Detalhes detectados pelo painel.</p></div></div><div className="detail-row"><span>Servidor</span><strong>{data?.device.hostname || '—'}</strong></div><div className="detail-row"><span>Arquitetura</span><strong>{data?.device.arch || '—'}</strong></div><div className="detail-row"><span>Editor</span><strong>{data?.editor.online ? 'Online' : 'Offline'}</strong></div><div className="detail-row"><span>Projetos</span><strong>{data?.projects.length ?? '—'}</strong></div></section><section className="settings-panel"><div className="settings-heading"><span className="info-badge"><BookOpen size={20} /></span><div><h2>Como começar</h2><p>Passos básicos de utilização.</p></div></div><ol className="setup-list"><li>Instale o code-server no Debian e execute o painel.</li><li>Abra <code>http://127.0.0.1:4173</code> no próprio dispositivo.</li><li>Configure dois domínios HTTPS com Cloudflare Tunnel e Access (API e editor).</li><li>No GitHub Pages, informe o endereço HTTPS da API e entre pelo Access.</li><li>Informe a URL HTTPS do editor e abra seus projetos.</li></ol></section></div></>}
+          <footer className="footer"><span><Code2 size={15} /> Termux Studio <span className="footer-version">v0.2.0</span></span><span>React + code-server · Desenvolvido para ARM64</span></footer>
         </div>
       </main>
       {toast && <div className="toast" role="status"><CircleHelp size={18} /><span>{toast}</span><button onClick={() => setToast('')} aria-label="Fechar mensagem"><X size={16} /></button></div>}

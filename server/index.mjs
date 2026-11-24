@@ -10,6 +10,14 @@ const distDir = resolve(here, '../dist')
 const { projectsRoot, editorUrl, healthUrl } = getSettings(process.env)
 const host = process.env.HOST || '127.0.0.1'
 const port = Number(process.env.PORT || 4173)
+const allowedOrigin = process.env.ALLOWED_ORIGIN || ''
+if (allowedOrigin) {
+  const origin = new URL(allowedOrigin)
+  if (origin.origin !== allowedOrigin || (origin.protocol !== 'https:' && !(origin.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(origin.hostname)))) {
+    console.error('ALLOWED_ORIGIN precisa ser uma origem HTTPS exata, sem barra final ou caminho.')
+    process.exit(1)
+  }
+}
 if (!['127.0.0.1', 'localhost', '::1'].includes(host)) {
   console.error('Segurança: HOST deve ser um endereço loopback. Use túnel com autenticação.')
   process.exit(1)
@@ -78,8 +86,22 @@ async function serveFile(res, requestedPath) {
 
 http.createServer(async (req, res) => {
   try {
-    if (req.method !== 'GET') return json(res, 405, { error: 'Método não permitido' })
     const url = new URL(req.url || '/', `http://${host}:${port}`)
+    // CORS somente no endpoint de leitura. O controle de identidade é feito
+    // separadamente pelo Cloudflare Access; Origin NÃO autentica ninguém.
+    if (url.pathname.startsWith('/api/') && req.headers.origin) {
+      if (!allowedOrigin || req.headers.origin !== allowedOrigin) {
+        return json(res, 403, { error: 'Origem não autorizada' })
+      }
+      res.setHeader('Access-Control-Allow-Origin', allowedOrigin)
+      res.setHeader('Access-Control-Allow-Credentials', 'true')
+      res.setHeader('Vary', 'Origin')
+    }
+    if (req.method === 'OPTIONS' && url.pathname === '/api/dashboard' && req.headers.origin === allowedOrigin && allowedOrigin) {
+      res.writeHead(204, { ...securityHeaders, 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Max-Age': '600' })
+      return res.end()
+    }
+    if (req.method !== 'GET') return json(res, 405, { error: 'Método não permitido' })
     if (url.pathname === '/api/dashboard') {
       const [projects, editorOnline] = await Promise.all([listProjects(projectsRoot), editorHealth()])
       return json(res, 200, {
