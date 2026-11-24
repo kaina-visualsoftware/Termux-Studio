@@ -1,0 +1,13 @@
+# Configuração para servidor próprio com IP público e DNS apontado.
+# Substitua os caminhos e configure firewall: 8883/TCP apenas. MQTT puro NÃO habilitado.
+listener 8883 0.0.0.0
+protocol mqtt
+allow_anonymous false
+password_file /etc/mosquitto/termux-studio.passwd
+acl_file /etc/mosquitto/termux-studio.acl
+certfile /etc/letsencrypt/live/mqtt.example.com/fullchain.pem
+keyfile /etc/letsencrypt/live/mqtt.example.com/privkey.pem
+persistence true
+persistence_location /var/lib/mosquitto/
+log_type error
+log_type warning

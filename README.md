@@ -123,3 +123,9 @@ npm run build # compilação de React (requer npm install)
 - [code-server: instalação no Termux](https://coder.com/docs/code-server/termux/)
 - [code-server: acesso seguro](https://coder.com/docs/code-server/guide/)
 - [Cloudflare: aplicações self-hosted](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/)
+
+## Termux Studio Remote (piloto auto-hospedado, sem cota mensal da aplicação)
+
+Foi adicionada uma arquitetura de acesso remoto via **MQTT sobre TLS** e gateway **MCP**. O agente inicia uma conexão de saída, sem abrir porta no Android; o gateway autentica requisições e encaminha ao agente. Ferramentas previstas: `list_projects`, `read_file`, `write_file`, `run_tests`, `run_build`, `git_status`. Operações de escrita e execução exigem ativação explícita por projeto confiável.
+
+Leia [docs/REMOTE-MQTT.md](docs/REMOTE-MQTT.md) para preparar o Mosquitto, configurar credenciais, instalar no Debian e validar. A infraestrutura de broker e OAuth precisa ser implantada e testada antes de disponibilizar acesso a IAs remotas. Não há limite de chamadas por mês no código, mas continuam existindo limites de capacidade/segurança e possíveis custos da infraestrutura e do provedor de IA.

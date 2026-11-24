@@ -23,3 +23,16 @@
 - code-server exige senha separada e utiliza conexões WebSocket sem falhas.
 - Portas locais não ficam diretamente acessíveis pela internet.
 - Reinicialização, perda de rede e suspensão Android têm comportamento documentado.
+
+## Nova frente — Termux Studio Remote
+
+| Marco | Escopo | Estado |
+| --- | --- | --- |
+| R0 | Protocolos MQTT+RPC, ACLs e política de acesso a workspaces | Implementado localmente; testes de unidade aprovados |
+| R1 | Agente Debian ARM64 persistente + broker Mosquitto TLS real | Código preparado; implantação e testes reais pendentes |
+| R2 | Gateway MCP HTTP com correlação por dispositivo e autenticação Bearer piloto | Código preparado; integração real pendente |
+| R3 | OAuth 2.1, sessões MCP modernas, cadastro/revogação de dispositivos | Pendente |
+| R4 | Painel React para pareamento, estados e autorizações | Pendente |
+| R5 | Testes externos ponta a ponta com ChatGPT e outros clientes MCP | Pendente |
+
+**Sem cota mensal artificial**, mas não sem limites de infraestrutura ou segurança. Não confundir testes de unidade locais com homologação real.
